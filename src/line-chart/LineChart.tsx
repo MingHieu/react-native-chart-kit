@@ -214,6 +214,10 @@ export interface LineChartProps extends AbstractChartProps {
    * The number of horizontal lines
    */
   segments?: number;
+  /**
+   * Callback that is called when a chart is clicked.
+   */
+  onChartClick?: () => void;
 }
 
 type LineChartState = {
@@ -792,6 +796,14 @@ class LineChart extends AbstractChart<LineChartProps, LineChartState> {
     ));
   };
 
+  onChartClick = () => {
+    const { onChartClick } = this.props;
+    if (!onChartClick) {
+      return;
+    }
+    onChartClick();
+  };
+
   render() {
     const {
       width,
@@ -850,6 +862,7 @@ class LineChart extends AbstractChart<LineChartProps, LineChartState> {
         <Svg
           height={height + (paddingBottom as number) + legendOffset}
           width={width - (margin as number) * 2 - (marginRight as number)}
+          onPress={this.onChartClick}
         >
           <Rect
             width="100%"
@@ -981,13 +994,15 @@ class LineChart extends AbstractChart<LineChartProps, LineChartState> {
             contentContainerStyle={{ width: width * 2 }}
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
-            onScroll={Animated.event([
-              {
-                nativeEvent: {
-                  contentOffset: { x: scrollableDotHorizontalOffset }
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: { x: scrollableDotHorizontalOffset }
+                  }
                 }
-              }
-            ], { useNativeDriver: false }
+              ],
+              { useNativeDriver: false }
             )}
             horizontal
             bounces={false}

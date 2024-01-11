@@ -3,6 +3,8 @@ import { Defs, Line, LinearGradient, Stop, Text } from "react-native-svg";
 
 import { ChartConfig, Dataset, PartialBy } from "./HelperTypes";
 
+import { get } from "lodash";
+
 export interface AbstractChartProps {
   fromZero?: boolean;
   fromNumber?: number;
@@ -14,6 +16,13 @@ export interface AbstractChartProps {
   xAxisLabel?: string;
   xLabelsOffset?: number;
   hidePointsAtIndex?: number[];
+  dataExtend?: {
+    current?: {
+      layoutLines: {
+        height: number;
+      };
+    };
+  };
 }
 
 export interface AbstractChartConfig extends ChartConfig {
@@ -44,7 +53,9 @@ class AbstractChart<
 > extends Component<AbstractChartProps & IProps, AbstractChartState & IState> {
   calcScaler = (data: number[]) => {
     if (this.props.fromZero && this.props.fromNumber) {
-      return Math.max(...data, this.props.fromNumber) - Math.min(...data, 0) || 1;
+      return (
+        Math.max(...data, this.props.fromNumber) - Math.min(...data, 0) || 1
+      );
     } else if (this.props.fromZero) {
       return Math.max(...data, 0) - Math.min(...data, 0) || 1;
     } else if (this.props.fromNumber) {
@@ -146,6 +157,10 @@ class AbstractChart<
 
     return [...new Array(count + 1)].map((_, i) => {
       const y = (basePosition / count) * i + paddingTop;
+      if (get(this.props, "dataExtend.current.layoutLines", undefined)) {
+        this.props.dataExtend.current.layoutLines = { height: y };
+      }
+
       return (
         <Line
           key={Math.random()}
